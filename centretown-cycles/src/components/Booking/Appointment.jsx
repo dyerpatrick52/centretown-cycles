@@ -9,11 +9,12 @@ import {
 } from 'react-bootstrap';
 import { useState } from 'react';
 import DatePicker from 'react-datepicker';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import 'react-datepicker/dist/react-datepicker.css';
 
 function Appointment() {
 	const { state } = useLocation();
+	const navigate = useNavigate();
 	const [service, setService] = useState(state?.service ?? 'Tune-up');
 	const [date, setDate] = useState(null);
 	const [timeSlot, setTimeSlot] = useState(null);
@@ -23,6 +24,10 @@ function Appointment() {
 		'1:00pm - 3:00pm',
 		'3:00pm - 5:00pm',
 	];
+
+	function handleBook() {
+		navigate('/booking/confirmation', { state: { service, date, timeSlot } });
+	}
 
 	return (
 		<Container className='appointment-container'>
@@ -43,23 +48,37 @@ function Appointment() {
 						<option>Flat Tire Repair</option>
 					</Form.Select>
 				</FormGroup>
-				<div className='datepicker'>
-					<DatePicker
-						selected={date}
-						onChange={(date) => setDate(date)}
-						minDate={new Date()}
-						inline
-					/>
-				</div>
-				{TIME_SLOTS.map((slot) => (
+				<Row className='align-items-start mx-1 mb-3'>
+					<Col xs='auto'>
+						<DatePicker
+							selected={date}
+							onChange={(d) => setDate(d)}
+							minDate={new Date()}
+							inline
+						/>
+					</Col>
+					<Col className='time-slots-col'>
+						<p className='time-slots-label'>Select a time:</p>
+						{TIME_SLOTS.map((slot) => (
+							<Button
+								key={slot}
+								className={`time-slot-btn ${timeSlot === slot ? 'selected' : ''}`}
+								onClick={() => setTimeSlot(slot)}
+							>
+								{slot}
+							</Button>
+						))}
+					</Col>
+				</Row>
+				<div className='book-btn-wrapper'>
 					<Button
-						key={slot}
-						className={`time-slot-btn ${timeSlot === slot ? 'active' : ''}`}
-						onClick={() => setTimeSlot(slot)}
+						className='book-appointment-btn'
+						disabled={!date || !timeSlot}
+						onClick={handleBook}
 					>
-						{slot}
+						Book Appointment
 					</Button>
-				))}
+				</div>
 			</Card>
 		</Container>
 	);
